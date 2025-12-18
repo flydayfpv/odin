@@ -9,9 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "dom-to-image-more": "^3.7.2",
+    "lucide-react": "^0.561.0",
     "next": "16.0.10",
     "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "react-dom": "19.2.1",
+    "sweetalert2": "^11.26.10",
+    "sweetalert2-react-content": "^5.1.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
