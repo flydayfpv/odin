@@ -2,7 +2,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Home, BarChart2, Users, LogOut, Menu, Settings,FileSpreadsheet,User2  } from 'lucide-react';
+import { Home, BarChart2, Users, LogOut, Menu, Settings, FileSpreadsheet, User2 } from 'lucide-react';
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -17,14 +17,14 @@ export default function Sidebar() {
   // กำหนด navItems ตาม role
   const getNavItems = (role) => {
     switch (role) {
-      case 'systemadmin' :
+      case 'systemadmin':
         return [
-                    { name: 'User ', href: '/odin/page/usermanagement', icon: <User2  size={18} /> },
+          { name: 'User ', href: '/odin/page/usermanagement', icon: <User2 size={18} /> },
 
         ]
       case 'admin':
         return [
-          { name: 'Manpower Plan', href: '/odin/page/ManpowerPlan', icon: <FileSpreadsheet  size={18} /> },
+          { name: 'Manpower Plan', href: '/odin/page/ManpowerPlan', icon: <FileSpreadsheet size={18} /> },
           { name: 'Manpower Report', href: '/odin/page/manpower', icon: <Users size={18} /> },
           { name: 'Reports', href: '/odin/page/reports', icon: <BarChart2 size={18} /> },
           { name: 'Admin Settings', href: '/odin/page/admin', icon: <Settings size={18} /> },
@@ -33,11 +33,14 @@ export default function Sidebar() {
         return [
           { name: 'Dashboard', href: '/odin/page/dashboard', icon: <Home size={18} /> },
           { name: 'My Tasks', href: '/odin/page/tasks', icon: <Users size={18} /> },
+
         ];
       case 'reporter':
         return [
           { name: 'Dashboard', href: '/odin/page/dashboard', icon: <Home size={18} /> },
-          { name: 'Reports', href: '/odin/page/reports', icon: <BarChart2 size={18} /> },
+          { name: 'Daily Reports', href: '/odin/page/reports', icon: <BarChart2 size={18} /> },
+          { name: 'Monthly Reports', href: '/odin/page/monthly', icon: <BarChart2 size={18} /> },
+
         ];
       default:
         return []; // หรือ navItems default
@@ -66,11 +69,10 @@ export default function Sidebar() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-all ${
-                active
+              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-all ${active
                   ? 'bg-indigo-600 text-white'
                   : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-              }`}
+                }`}
             >
               {item.icon}
               {isOpen && <span>{item.name}</span>}

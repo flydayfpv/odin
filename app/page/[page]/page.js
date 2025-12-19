@@ -5,6 +5,7 @@ import ManpowerPlansPage from '@/app/components/ManpowerPlan';
 import ManpowerPlanDetail from '@/app/components/ManpowerPlanDetail';
 import ManpowerReport from '@/app/components/ManpowerReport';
 import Usermanagement from '@/app/components/Usermanagement';
+import MonthlyReport from '@/app/components/MonthlyReport'
 import { useParams } from 'next/navigation';
 
 export default function DynamicPage() {
@@ -28,11 +29,13 @@ export default function DynamicPage() {
       case 'manpowerplandetail':
         return <ManpowerPlanDetail />
 
-        case 'reports':
+      case 'reports':
         return <DailyReport />;
 
-        
-    
+      case 'monthly':
+        return <MonthlyReport />;
+
+
 
       default:
         return (
