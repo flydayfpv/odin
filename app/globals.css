@@ -2,27 +2,30 @@
 
 /* ===================== LOAD LOCAL FONT ===================== */
 @font-face {
-  font-family: 'TH Sarabun';
-  src: url('/fonts/THSarabunNew.ttf') format('truetype');
+  font-family: "TH Sarabun";
+  src: url("../public/fonts/THSarabunNew.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-  font-family: 'TH Sarabun';
-  src: url('/fonts/THSarabunNewBold.ttf') format('truetype');
+  font-family: "TH Sarabun";
+  src: url("../public/fonts/THSarabunNewBold.ttf") format("truetype");
   font-weight: 700;
-  font-style: bold;
+  font-style: normal;
+  font-display: swap;
 }
 
 /* ===================== ROOT VARIABLES ===================== */
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --font-sans: 'TH Sarabun', Arial, Helvetica, sans-serif;
-  --font-mono: 'Courier New', monospace;
+  --font-sans: "TH Sarabun", Arial, Helvetica, sans-serif;
+  --font-mono: "Courier New", monospace;
 }
 
+/* Tailwind v4 theme mapping */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -46,9 +49,10 @@ body {
   margin: 0;
   padding: 0;
   line-height: 1.5;
+
 }
 
-/* ===================== ADDITIONAL ELEMENT STYLING ===================== */
+/* ===================== ELEMENT ===================== */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-sans);
 }

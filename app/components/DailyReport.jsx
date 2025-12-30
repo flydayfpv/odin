@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import domtoimage from "dom-to-image-more";
-import { Pencil, Check, X } from "lucide-react";
+import { Pencil, Check, X, Image, Download } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -386,7 +386,7 @@ export default function DailyDashboard() {
 	if (!plans.length || !plans[0].planDetails.length) {
 		return (
 			<div className="p-6 text-center space-y-4">
-				<div className="text-red-600 text-sm font-bold">
+				<div className="text-red-600 text-xl font-bold">
 					สิ้นสุดสัญญาแล้ว หรือ ไม่พบข้อมูล
 				</div>
 				<div className="flex items-center gap-3 justify-center">
@@ -456,7 +456,7 @@ export default function DailyDashboard() {
 	// /////////////////////////
 
 	return (
-		<div className="p-6 space-y-6 bg-gray-50 min-h-screen  mb-5">
+		<div className="p-3 space-y-3 bg-gray-50 min-h-screen  mb-5">
 			{/* --- Alert Bar สีแดง --- */}
 
 			{isDailyReportEmpty && (
@@ -477,12 +477,14 @@ export default function DailyDashboard() {
 				<div className="flex justify-end">
 					<button
 						onClick={exportToImage}
-						className="px-4 py-2 bg-green-600 text-white rounded shadow"
+						className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700"
 					>
-						Export to Image
+						<Image size={18} />
+						{/* หรือใช้ <Download size={18} /> */}
+						บันทึกเป็นรูปภาพ
 					</button>
 				</div>
-				<h1 className="text-sm font-bold text-gray-800">
+				<h1 className="text-xl font-bold text-gray-800">
 					Daily Dashboard -{" "}
 					{plan.division?.name || <span className="text-red-500">N/A</span>}
 				</h1>
@@ -508,10 +510,10 @@ export default function DailyDashboard() {
 				</h1>
 				{/* Main Summary Table */}
 				<div className="grid grid-cols-1 xl:grid-cols-[260px_1fr] gap-4 overflow-hidden p-6" style={{ border: "none" }}>
-					<h2 className="text-lg font-bold mb-2" style={{ border: "none" }}>
+					<h2 className="text-xl font-bold mb-2" style={{ border: "none" }}>
 						สรุปภาพรวม
 					</h2>
-					<table className="w-full text-xs border border-collapse text-center ">
+					<table className="w-full text-[14px] border border-collapse text-center ">
 						<thead className="bg-green-100 text-gray-700">
 							<tr>
 								<th className="border p-1   text-center" colSpan={3}>
@@ -601,7 +603,7 @@ export default function DailyDashboard() {
 						</thead>
 						<tbody>
 							{/* ===== แถวบน : ค่าบวก ===== */}
-							<tr className="font-bold text-lg">
+							<tr className="font-bold text-xl">
 								{/* กรอบกำลังพล */}
 								<td className="border p-1 text-center" rowSpan={2}>
 									{formatNumber(totalMaximum)}
@@ -709,7 +711,7 @@ export default function DailyDashboard() {
 							</tr>
 
 							{/* ===== แถวล่าง : ค่าลบ ===== */}
-							<tr className="font-bold bg-blue-50  text-lg">
+							<tr className="font-bold bg-blue-50  text-xl">
 								<td className="border p-1 text-center text-red-600">
 									{formatNumber(sumNegative(allItems, manDiff))}
 								</td>
@@ -725,7 +727,7 @@ export default function DailyDashboard() {
 				</div>
 
 				<h2
-					className="text-lg font-bold text-gray-800"
+					className="text-xl font-bold text-gray-800"
 					style={{ border: "none" }}
 				>
 					รายละเอียดตามงาน
@@ -739,12 +741,12 @@ export default function DailyDashboard() {
 						<div className="grid grid-cols-1 xl:grid-cols-[260px_1fr] gap-1 overflow-hidden p-6">
 							{maxByJob[items[0]?.jobId] !== undefined && (
 								<div className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
-									<table className="w-full text-sm text-center border-collapse">
+									<table className="w-full text-xl text-center border-collapse">
 										<thead>
 											<tr>
 												<th
 													colSpan={3}
-													className="bg-gray-100 text-gray-800 text-lg font-bold py-2"
+													className="bg-gray-100 text-gray-800 text-xl font-bold py-2"
 												>
 													{jobName}
 												</th>
@@ -758,13 +760,13 @@ export default function DailyDashboard() {
 
 										<tbody>
 											<tr className="font-semibold">
-												<td className="border py-2 text-lg">
+												<td className="border py-2 text-xl">
 													{formatNumber(maxByJob[items[0].jobId])}
 												</td>
-												<td className="border py-2 text-lg text-blue-600">
+												<td className="border py-2 text-xl text-blue-600">
 													{formatNumber(sumField(items, "inRoster"))}
 												</td>
-												<td className="border py-2 text-lg font-bold text-green-600">
+												<td className="border py-2 text-xl font-bold text-green-600">
 													{percent(
 														sumField(items, "inRoster"),
 														maxByJob[items[0].jobId]
@@ -778,7 +780,7 @@ export default function DailyDashboard() {
 							)}
 
 							<table className="w-full text-center  border border-collapse ">
-								<thead className="text-xs">
+								<thead className="text-[14px]">
 									<tr className="bg-yellow-100 text-gray-700">
 										<th className="border p-1   text-center" rowSpan={3}>
 											ผลัด
@@ -817,7 +819,7 @@ export default function DailyDashboard() {
 											เกิน/ขาด จากแผน
 										</th>
 										<th className="border p-1   text-center " rowSpan={3}>
-											<span className=""> Action</span>
+											<span className="">แก้ไข</span>
 										</th>
 									</tr>
 									<tr className="bg-yellow-100 text-gray-700">
@@ -1089,7 +1091,7 @@ export default function DailyDashboard() {
 										);
 									})}
 
-									<tr className="bg-gray-100 font-bold text-gray-800">
+									<tr className="bg-gray-100 font-bold text-2xl text-gray-800">
 										<td className="border p-1  text-center" rowSpan={2}>
 											รวม
 										</td>
@@ -1201,7 +1203,7 @@ export default function DailyDashboard() {
 											rowSpan={2}
 										></td>
 									</tr>
-									<tr className="bg-blue-100">
+									<tr className="bg-red-100 font-bold text-xl">
 										<td className="p-1"> {formatNumber(sumNegative(items, manDiff))}</td>
 										<td className="p-1"> {formatNumber(sumNegative(items, operateDiff))}</td>
 										<td className="p-1"> {formatNumber(sumNegative(items, diffPlan))}</td>

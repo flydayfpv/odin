@@ -44,7 +44,7 @@ export default function OdinLogin() {
       }
 
       // → แทนที่จะไป dashboard โดยตรง ให้ไปหน้า roleCheck ก่อน
-      router.push("/roleCheckPage");
+      router.replace("/odin/roleCheckPage");
     } catch (err) {
       setError(err.message || "Unable to login");
     } finally {
@@ -67,7 +67,7 @@ export default function OdinLogin() {
             <div className="flex-1">
               <h2 className="text-2xl font-semibold text-white">Sign in to ODIN</h2>
               <p className="text-sm text-slate-300 mt-1">
-                Secure access — enterprise single-pane control
+                Secure access — enterprise single-pane control 11
               </p>
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-4">

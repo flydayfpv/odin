@@ -7,6 +7,7 @@ import ManpowerReport from '@/app/components/ManpowerReport';
 import Usermanagement from '@/app/components/Usermanagement';
 import MonthlyReport from '@/app/components/MonthlyReport'
 import { useParams } from 'next/navigation';
+import ReporterDashboard from '@/app/components/ReporterDashboard';
 
 export default function DynamicPage() {
   const { page } = useParams();
@@ -34,6 +35,10 @@ export default function DynamicPage() {
 
       case 'monthly':
         return <MonthlyReport />;
+
+        case 'ReporterDashboard':
+        return <ReporterDashboard />;
+
 
 
 
