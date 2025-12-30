@@ -18,7 +18,7 @@ export default function DynamicPage() {
       case 'usermanagement':
         return <Usermanagement />
 
-      case 'dashboard':
+      case 'Dashboard':
         return <DashboardContent />;
 
       case 'manpower':
