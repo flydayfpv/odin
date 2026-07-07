@@ -1,687 +1,108 @@
 'use client';
+import { useState, useEffect } from 'react';
 
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import Swal from 'sweetalert2';
+export default function DailyReportEntry() {
+  // --- 1. State Management ---
+  const [torDetails, setTorDetails] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedDetailId, setSelectedDetailId] = useState('');
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  const [criteria, setCriteria] = useState({
+    date: '',
+    shift_id: '',
+    branch_id: '11'
+  });
 
-export default function DailyReportPage() {
+  // State สำหรับเก็บข้อมูลตาม Model DailyReportDetail
+  const [formData, setFormData] = useState({
+    present_qty: 0, sick_qty: 0, absent_qty: 0, vacation_qty: 0,
+    other_leave_qty: 0, ot_dayoff_qty: 0, ot_rest_shift_qty: 0,
+    ot_serail_qty: 0, reserve_qty: 0, reserv_ot_qty: 0,
+    resverve_serial_qty: 0, uncounted_qty: 0, ojt_qty: 0
+  });
 
-  const [reportDate, setReportDate] =
-    useState(
-      new Date()
-        .toISOString()
-        .split('T')[0]
-    );
-
-  const [departments, setDepartments] =
-    useState([]);
-
-  const [expandedDepartment,
-    setExpandedDepartment] =
-    useState(null);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  useEffect(() => {
-
-    loadData();
-
-  }, []);
-
-  const loadData = async () => {
-
+  // --- 2. Data Fetching ---
+  const fetchTorData = async () => {
+    if (!criteria.date || !criteria.shift_id) return;
+    setLoading(true);
     try {
-
-      const response =
-        await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/departments/report-template`
-        );
-
-      setDepartments(
-        response.data
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
+      const res = await fetch(`${API_BASE_URL}/api/tor-versions/active?date=${criteria.date}&branch_id=${criteria.branch_id}`);
+      const result = await res.json();
+      const filtered = result?.data?.torDetails?.filter(
+        d => d.shift_id === parseInt(criteria.shift_id)
+      ) || [];
+      setTorDetails(filtered);
+    } catch (err) {
+      console.error(err);
+      setTorDetails([]);
     } finally {
-
       setLoading(false);
-
     }
-
   };
 
-  const updateRow = (
-    depIndex,
-    rowIndex,
-    field,
-    value
-  ) => {
+  useEffect(() => { fetchTorData(); }, [criteria.date, criteria.shift_id]);
 
-    const temp =
-      [...departments];
+  // --- 3. Handlers ---
+  const selectedDetail = torDetails.find(d => d.id === parseInt(selectedDetailId));
 
-    temp[depIndex]
-      .rows[rowIndex][field] =
-      Number(value);
-
-    setDepartments(temp);
-
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: parseInt(e.target.value) || 0 });
   };
 
-  const saveDraft = async () => {
-
+  const handleSubmit = async () => {
+    if (!selectedDetail) return;
+    const payload = {
+      ...formData,
+      report_id: 1, // กำหนด ID รายงานหลัก (ปรับตามการใช้งานจริง)
+      department_id: selectedDetail.department_id,
+      shift_id: selectedDetail.shift_id,
+      tor_qty: selectedDetail.required_qty
+    };
+    
     try {
-
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/daily-reports`,
-        {
-          report_date:
-            reportDate,
-          departments
-        }
-      );
-
-      Swal.fire({
-        icon: 'success',
-        title: 'Saved',
-        text: 'Draft saved successfully'
+      const res = await fetch('/api/daily-report-details', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
-
-    } catch (error) {
-
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.message
-      });
-
-    }
-
+      if (res.ok) alert("บันทึกข้อมูลเรียบร้อย!");
+    } catch (err) { alert("เกิดข้อผิดพลาด"); }
   };
-
-  const submitReport = async () => {
-
-    const result =
-      await Swal.fire({
-        title: 'Submit Report ?',
-        icon: 'question',
-        showCancelButton: true
-      });
-
-    if (!result.isConfirmed)
-      return;
-
-    Swal.fire({
-      icon: 'success',
-      title: 'Submitted'
-    });
-
-  };
-
-  const summary =
-    departments.reduce(
-      (acc, dep) => {
-
-        dep.rows.forEach(row => {
-
-          acc.tor += row.tor_qty;
-
-          acc.present +=
-            row.present_qty || 0;
-
-        });
-
-        return acc;
-
-      },
-      {
-        tor: 0,
-        present: 0
-      }
-    );
-
-  const shortage =
-    summary.tor -
-    summary.present;
 
   return (
+    <div className="p-6 max-w-2xl mx-auto space-y-4">
+      <h1 className="text-2xl font-bold">รายงานกำลังพลประจำวัน</h1>
 
-    <div className="p-6">
+      {/* ขั้นตอนการเลือก */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="date" className="border p-2 rounded" onChange={(e) => setCriteria({...criteria, date: e.target.value})} />
+        <select className="border p-2 rounded" disabled={!criteria.date} onChange={(e) => setCriteria({...criteria, shift_id: e.target.value})}>
+          <option value="">-- เลือก Shift --</option>
+          <option value="7">เช้า</option>
+          <option value="9">ดึก</option>
+        </select>
+      </div>
 
-      {/* HEADER */}
+      <select className="w-full border p-2 rounded" disabled={!criteria.shift_id} onChange={(e) => setSelectedDetailId(e.target.value)}>
+        <option value="">-- เลือกตำแหน่ง --</option>
+        {torDetails.map(d => <option key={d.id} value={d.id}>{d.position.name}</option>)}
+      </select>
 
-      <div
-        className="
-        bg-white
-        rounded-xl
-        shadow
-        p-6
-        mb-6
-      "
-      >
-
-        <div
-          className="
-          flex
-          justify-between
-          items-center
-        "
-        >
-
-          <div>
-
-            <h1
-              className="
-              text-3xl
-              font-bold
-            "
-            >
-              Daily Manpower Report
-            </h1>
-
-            <p
-              className="
-              text-slate-500
-            "
-            >
-              ODIN Daily Reporting
-            </p>
-
+      {/* ฟอร์มกรอกข้อมูล */}
+      {selectedDetail && (
+        <div className="border p-4 rounded bg-gray-50">
+          <p className="font-bold mb-2">TOR Requirement: {selectedDetail.required_qty} คน</p>
+          <div className="grid grid-cols-2 gap-3">
+            {Object.keys(formData).map((key) => (
+              <div key={key}>
+                <label className="text-xs uppercase">{key.replace('_qty', '')}</label>
+                <input name={key} type="number" className="w-full border p-1 rounded" onChange={handleChange} />
+              </div>
+            ))}
           </div>
-
-          <input
-            type="date"
-            value={reportDate}
-            onChange={(e) =>
-              setReportDate(
-                e.target.value
-              )
-            }
-            className="
-              border
-              rounded-lg
-              px-4
-              py-2
-            "
-          />
-
+          <button onClick={handleSubmit} className="mt-4 w-full bg-green-600 text-white p-2 rounded">บันทึกรายงาน</button>
         </div>
-
-      </div>
-
-      {/* SUMMARY */}
-
-      <div
-        className="
-        grid
-        md:grid-cols-4
-        gap-4
-        mb-6
-      "
-      >
-
-        <SummaryCard
-          title="TOR"
-          value={summary.tor}
-        />
-
-        <SummaryCard
-          title="Present"
-          value={summary.present}
-        />
-
-        <SummaryCard
-          title="Shortage"
-          value={shortage}
-        />
-
-        <SummaryCard
-          title="Attendance"
-          value={
-            summary.tor > 0
-              ? (
-                  summary.present /
-                  summary.tor *
-                  100
-                ).toFixed(1) + '%'
-              : '0%'
-          }
-        />
-
-      </div>
-
-      {/* DEPARTMENTS */}
-
-      {
-        departments.map(
-          (
-            department,
-            depIndex
-          ) => (
-
-            <div
-              key={department.id}
-              className="
-                bg-white
-                rounded-xl
-                shadow
-                mb-4
-              "
-            >
-
-              <button
-                onClick={() =>
-                  setExpandedDepartment(
-                    expandedDepartment ===
-                      department.id
-                      ? null
-                      : department.id
-                  )
-                }
-                className="
-                  w-full
-                  p-4
-                  text-left
-                  flex
-                  justify-between
-                "
-              >
-
-                <div>
-
-                  <h2
-                    className="
-                    font-bold
-                    text-lg
-                  "
-                  >
-                    {department.name}
-                  </h2>
-
-                  <p
-                    className="
-                    text-sm
-                    text-slate-500
-                  "
-                  >
-                    TOR :
-                    {' '}
-                    {
-                      department.rows
-                        .reduce(
-                          (a, b) =>
-                            a +
-                            b.tor_qty,
-                          0
-                        )
-                    }
-                  </p>
-
-                </div>
-
-                <span>
-
-                  {
-                    expandedDepartment ===
-                    department.id
-                      ? '−'
-                      : '+'
-                  }
-
-                </span>
-
-              </button>
-
-              {
-                expandedDepartment ===
-                  department.id && (
-
-                  <div
-                    className="
-                    border-t
-                    overflow-auto
-                  "
-                  >
-
-                    <table
-                      className="
-                      w-full
-                      text-sm
-                    "
-                    >
-
-                      <thead>
-
-                        <tr
-                          className="
-                          bg-slate-100
-                        "
-                        >
-
-                          <th className="p-3">
-                            Position
-                          </th>
-
-                          <th className="p-3">
-                            Shift
-                          </th>
-
-                          <th className="p-3">
-                            TOR
-                          </th>
-
-                          <th className="p-3">
-                            Present
-                          </th>
-
-                          <th className="p-3">
-                            Sick
-                          </th>
-
-                          <th className="p-3">
-                            Vacation
-                          </th>
-
-                          <th className="p-3">
-                            Other
-                          </th>
-
-                          <th className="p-3">
-                            Shortage
-                          </th>
-
-                        </tr>
-
-                      </thead>
-
-                      <tbody>
-
-                        {
-                          department.rows.map(
-                            (
-                              row,
-                              rowIndex
-                            ) => {
-
-                              const short =
-                                row.tor_qty -
-                                (
-                                  row.present_qty ||
-                                  0
-                                );
-
-                              return (
-
-                                <tr
-                                  key={
-                                    row.id
-                                  }
-                                  className="
-                                  border-t
-                                "
-                                >
-
-                                  <td className="p-3">
-                                    {
-                                      row.position
-                                    }
-                                  </td>
-
-                                  <td className="p-3">
-                                    {
-                                      row.shift
-                                    }
-                                  </td>
-
-                                  <td
-                                    className="
-                                    p-3
-                                    bg-slate-100
-                                  "
-                                  >
-                                    {
-                                      row.tor_qty
-                                    }
-                                  </td>
-
-                                  <td className="p-3">
-
-                                    <input
-                                      type="number"
-                                      value={
-                                        row.present_qty ||
-                                        ''
-                                      }
-                                      onChange={(
-                                        e
-                                      ) =>
-                                        updateRow(
-                                          depIndex,
-                                          rowIndex,
-                                          'present_qty',
-                                          e.target
-                                            .value
-                                        )
-                                      }
-                                      className="
-                                      w-20
-                                      border
-                                      rounded
-                                      px-2
-                                      py-1
-                                    "
-                                    />
-
-                                  </td>
-
-                                  <td className="p-3">
-
-                                    <input
-                                      type="number"
-                                      value={
-                                        row.sick_qty ||
-                                        ''
-                                      }
-                                      onChange={(
-                                        e
-                                      ) =>
-                                        updateRow(
-                                          depIndex,
-                                          rowIndex,
-                                          'sick_qty',
-                                          e.target
-                                            .value
-                                        )
-                                      }
-                                      className="
-                                      w-20
-                                      border
-                                      rounded
-                                      px-2
-                                      py-1
-                                    "
-                                    />
-
-                                  </td>
-
-                                  <td className="p-3">
-
-                                    <input
-                                      type="number"
-                                      value={
-                                        row.vacation_qty ||
-                                        ''
-                                      }
-                                      onChange={(
-                                        e
-                                      ) =>
-                                        updateRow(
-                                          depIndex,
-                                          rowIndex,
-                                          'vacation_qty',
-                                          e.target
-                                            .value
-                                        )
-                                      }
-                                      className="
-                                      w-20
-                                      border
-                                      rounded
-                                      px-2
-                                      py-1
-                                    "
-                                    />
-
-                                  </td>
-
-                                  <td className="p-3">
-
-                                    <input
-                                      type="number"
-                                      value={
-                                        row.other_leave_qty ||
-                                        ''
-                                      }
-                                      onChange={(
-                                        e
-                                      ) =>
-                                        updateRow(
-                                          depIndex,
-                                          rowIndex,
-                                          'other_leave_qty',
-                                          e.target
-                                            .value
-                                        )
-                                      }
-                                      className="
-                                      w-20
-                                      border
-                                      rounded
-                                      px-2
-                                      py-1
-                                    "
-                                    />
-
-                                  </td>
-
-                                  <td
-                                    className="
-                                    p-3
-                                    font-bold
-                                    text-red-600
-                                  "
-                                  >
-                                    {short}
-                                  </td>
-
-                                </tr>
-
-                              );
-
-                            }
-                          )
-                        }
-
-                      </tbody>
-
-                    </table>
-
-                  </div>
-
-                )
-              }
-
-            </div>
-
-          )
-        )
-      }
-
-      {/* FOOTER */}
-
-      <div
-        className="
-        flex
-        justify-end
-        gap-3
-        mt-6
-      "
-      >
-
-        <button
-          onClick={saveDraft}
-          className="
-          bg-yellow-500
-          text-white
-          px-6
-          py-3
-          rounded-lg
-        "
-        >
-          Save Draft
-        </button>
-
-        <button
-          onClick={submitReport}
-          className="
-          bg-blue-600
-          text-white
-          px-6
-          py-3
-          rounded-lg
-        "
-        >
-          Submit Report
-        </button>
-
-      </div>
-
+      )}
     </div>
-
   );
-
-}
-
-function SummaryCard({
-  title,
-  value
-}) {
-
-  return (
-
-    <div
-      className="
-      bg-white
-      shadow
-      rounded-xl
-      p-4
-    "
-    >
-
-      <div
-        className="
-        text-slate-500
-        text-sm
-      "
-      >
-        {title}
-      </div>
-
-      <div
-        className="
-        text-3xl
-        font-bold
-      "
-      >
-        {value}
-      </div>
-
-    </div>
-
-  );
-
 }
