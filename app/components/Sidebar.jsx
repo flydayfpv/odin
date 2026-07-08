@@ -63,9 +63,9 @@ const menuConfig = [
   },
 
   {
-    name: 'Reports',
+    name: 'Daily Reports',
     icon: LuChartColumnIncreasing,
-    href: '/pages/reports',
+    href: '/pages/dailyreport',
     roles: [
       'Super Admin',
       'HQ',
